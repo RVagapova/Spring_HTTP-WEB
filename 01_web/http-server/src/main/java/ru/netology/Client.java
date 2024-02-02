@@ -36,6 +36,7 @@ public class Client extends Thread {
 
             // ищем request line
             final var requestLineDelimiter = new byte[]{'\r', '\n'};
+//            System.out.println("request = " + requestLineDelimiter.toString());
             final var requestLineEnd = indexOf(buffer, requestLineDelimiter, 0, read);
             if (requestLineEnd == -1) {
                 badRequest(out);
@@ -54,11 +55,23 @@ public class Client extends Thread {
             }
 //            System.out.println("method " + method);
 
-            final var path = requestLine[1];
-            if (!path.startsWith("/")) {
+            final var pathWithParams = requestLine[1];
+            if (!pathWithParams.startsWith("/")) {
                 badRequest(out);
             }
-            System.out.println("path " + path);
+//            System.out.println("pathWithParams " + pathWithParams);
+            String path;
+            Map<String, List<String>> query;
+            if (pathWithParams.contains("?")) {
+                String[] url = pathWithParams.split("\\?");
+                path = url[0];
+                query = Request.getQueryParams(url[1]);
+                String password = Request.getQueryParam("password", url[1]);
+                System.out.println("query " + query);
+                System.out.println("password " + password);
+            } else {
+                path = pathWithParams;
+            }
 
             // ищем заголовки
             final var headersDelimiter = new byte[]{'\r', '\n', '\r', '\n'};
@@ -95,6 +108,7 @@ public class Client extends Thread {
                     System.out.println(body);
                 }
                 request.setBody(body);
+                System.out.println("body =" + body);
             }
 
             // создаю

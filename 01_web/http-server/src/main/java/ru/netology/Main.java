@@ -52,7 +52,7 @@ public class Main {
         };
 
 
-        server.addHandler("GET", "/classic.html", handlerGET);
+        server.addHandler("GET", "/forms.html", handlerGET);
         server.addHandler("POST", "/message", handlerPOST);
 
         try {
