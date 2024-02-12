@@ -2,13 +2,10 @@ package ru.netology;
 
 import org.apache.hc.core5.http.NameValuePair;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.hc.core5.net.URLEncodedUtils.parse;
 
 public class Request {
     //http://localhost:63342/http-server/01_web/http-server/public/forms.html?login=1&password=2
@@ -56,9 +53,8 @@ public class Request {
         return body;
     }
 
-    public static Map<String, List<String>> getQueryParams(String url) {
+    public static Map<String, List<String>> getQueryParams(List<NameValuePair> params) {
         Map<String, List<String>> queryParams = new HashMap<>();
-        params = parse(url, Charset.defaultCharset(), '&');
         for (NameValuePair param : params) {
             if (queryParams.containsKey(param.getName())) {
                 queryParams.get(param.getName()).add(param.getValue());
@@ -71,11 +67,11 @@ public class Request {
         return queryParams;
     }
 
-    public static String getQueryParam(String name, String url) {
-        params = parse(url, Charset.defaultCharset(), '&');
+    public static String getQueryParam(String name, List<NameValuePair> params) {
         return params.stream()
                 .filter(par -> par.getName().equals(name))
                 .findFirst()
                 .get().getValue();
     }
+
 }

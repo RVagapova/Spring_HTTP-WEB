@@ -1,23 +1,29 @@
 package ru.netology;
 
+import org.apache.hc.core5.http.NameValuePair;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Client extends Thread {
+import static org.apache.hc.core5.net.URLEncodedUtils.parse;
+
+public class ParsingRequest extends Thread {
     private final BufferedInputStream in;
     private final BufferedOutputStream out;
     private static final String GET = "GET";
     private static final String POST = "POST";
-    public static final Map<String, Map<String, Handler>> handlers = new ConcurrentHashMap<>();
+    private static List<NameValuePair> params;
+    public static final ConcurrentHashMap<String, ConcurrentHashMap<String, Handler>> handlers = new ConcurrentHashMap<>();
 
-    public Client(Socket socket) throws IOException {
+    public ParsingRequest(Socket socket) throws IOException {
         in = new BufferedInputStream(socket.getInputStream());
         out = new BufferedOutputStream(socket.getOutputStream());
     }
@@ -65,8 +71,10 @@ public class Client extends Thread {
             if (pathWithParams.contains("?")) {
                 String[] url = pathWithParams.split("\\?");
                 path = url[0];
-                query = Request.getQueryParams(url[1]);
-                String password = Request.getQueryParam("password", url[1]);
+
+                params = parse(url[1], Charset.defaultCharset(), '&');
+                query = Request.getQueryParams(params);
+                String password = Request.getQueryParam("password", params);
                 System.out.println("query " + query);
                 System.out.println("password " + password);
             } else {

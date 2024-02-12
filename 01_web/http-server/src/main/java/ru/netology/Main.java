@@ -56,7 +56,7 @@ public class Main {
         server.addHandler("POST", "/message", handlerPOST);
 
         try {
-            server.startServer();
+            server.start();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
