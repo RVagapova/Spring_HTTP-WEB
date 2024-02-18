@@ -20,7 +20,6 @@ public class ParsingRequest extends Thread {
     private final BufferedOutputStream out;
     private static final String GET = "GET";
     private static final String POST = "POST";
-    private static List<NameValuePair> params;
     public static final ConcurrentHashMap<String, ConcurrentHashMap<String, Handler>> handlers = new ConcurrentHashMap<>();
 
     public ParsingRequest(Socket socket) throws IOException {
@@ -30,6 +29,7 @@ public class ParsingRequest extends Thread {
 
     @Override
     public void run() {
+//        Request request = null;
         final var allowedMethods = List.of(GET, POST);
 
         try {
@@ -50,7 +50,7 @@ public class ParsingRequest extends Thread {
 
             // читаем request line
             final var requestLine = new String(Arrays.copyOf(buffer, requestLineEnd)).split(" ");
-            System.out.println(requestLine);
+            System.out.println(Arrays.toString(requestLine));
             if (requestLine.length != 3) {
                 badRequest(out);
             }
@@ -59,6 +59,9 @@ public class ParsingRequest extends Thread {
             if (!allowedMethods.contains(method)) {
                 badRequest(out);
             }
+
+            Request request = new Request();
+            request.setMethod(method);
 //            System.out.println("method " + method);
 
             final var pathWithParams = requestLine[1];
@@ -72,14 +75,17 @@ public class ParsingRequest extends Thread {
                 String[] url = pathWithParams.split("\\?");
                 path = url[0];
 
-                params = parse(url[1], Charset.defaultCharset(), '&');
-                query = Request.getQueryParams(params);
-                String password = Request.getQueryParam("password", params);
+                List<NameValuePair> params = parse(url[1], Charset.defaultCharset(), '&');
+                //todo ??
+                request.setParams(params);
+                query = request.getQueryParams();
+                String password = request.getQueryParam("password");
                 System.out.println("query " + query);
                 System.out.println("password " + password);
             } else {
                 path = pathWithParams;
             }
+            request.setPath(path);
 
             // ищем заголовки
             final var headersDelimiter = new byte[]{'\r', '\n', '\r', '\n'};
@@ -97,9 +103,10 @@ public class ParsingRequest extends Thread {
 
             final var headersBytes = in.readNBytes(headersEnd - headersStart);
             final var headers = Arrays.asList(new String(headersBytes).split("\r\n"));
+            //todo ??
+            request.setHeaders(headers);
             System.out.println("headers" + headers);
 
-            Request request = new Request(method, path, headers);
             System.out.println(request.getMethod() + " ");
 
             // для GET тела нет

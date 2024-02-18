@@ -13,13 +13,7 @@ public class Request {
     private List<String> headers;
     private String body;
     private String path;
-    private static List<NameValuePair> params;
-
-    public Request(String method, String path, List<String> headers) {
-        this.method = method;
-        this.path = path;
-        this.headers = headers;
-    }
+    private List<NameValuePair> params;
 
     public void setPath(String path) {
         this.path = path;
@@ -53,7 +47,11 @@ public class Request {
         return body;
     }
 
-    public static Map<String, List<String>> getQueryParams(List<NameValuePair> params) {
+    public void setParams(List<NameValuePair> params) {
+        this.params = params;
+    }
+
+    public Map<String, List<String>> getQueryParams() {
         Map<String, List<String>> queryParams = new HashMap<>();
         for (NameValuePair param : params) {
             if (queryParams.containsKey(param.getName())) {
@@ -67,7 +65,7 @@ public class Request {
         return queryParams;
     }
 
-    public static String getQueryParam(String name, List<NameValuePair> params) {
+    public String getQueryParam(String name) {
         return params.stream()
                 .filter(par -> par.getName().equals(name))
                 .findFirst()
